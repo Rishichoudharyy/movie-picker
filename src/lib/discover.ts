@@ -10,6 +10,7 @@ import {
   parseRuntimeMinutes,
   type RuntimeBucket,
 } from "./omdb";
+import { CURATED_GENRES } from "./genres";
 
 export interface Recommendation {
   id: number;
@@ -117,7 +118,53 @@ export async function getTrendingWithPosters(
   return enriched.filter((t) => t.poster !== null);
 }
 
-function dedupeSources(
+// A deliberately contrasting pick for Watch Next's "surprise me" — picks a
+// genre the user's logged movies *don't* have, then a decent popular title
+// from it. Honest framing ("something different"), not a fabricated
+// personality quip: it's a real different-genre pool, randomly sampled.
+export async function getSurpriseMe(
+  excludeGenreNames: string[],
+  type: "movie" | "tv_series" = "movie"
+): Promise<Recommendation | null> {
+  const excludeSet = new Set(excludeGenreNames.map((g) => g.toLowerCase()));
+  const contrastGenres = CURATED_GENRES.filter(
+    (g) => !excludeSet.has(g.toLowerCase())
+  );
+  const pool = contrastGenres.length > 0 ? contrastGenres : CURATED_GENRES;
+  const genre = pool[Math.floor(Math.random() * pool.length)];
+
+  const candidates = await discoverTitles({
+    genreNames: [genre],
+    sourceNames: [],
+    type,
+    region: "IN",
+    limit: 10,
+  });
+
+  const withImdbId = candidates.filter((c) => c.imdb_id);
+  if (withImdbId.length === 0) return null;
+  const chosen = withImdbId[Math.floor(Math.random() * withImdbId.length)];
+
+  const [omdb, sources] = await Promise.all([
+    getOmdbByImdbId(chosen.imdb_id!).catch(() => null),
+    getTitleSources(chosen.id, "IN").catch(() => [] as WatchmodeTitleSource[]),
+  ]);
+
+  return {
+    id: chosen.id,
+    title: chosen.title,
+    year: omdb?.Year ?? String(chosen.year ?? ""),
+    poster: omdb?.Poster && omdb.Poster !== "N/A" ? omdb.Poster : null,
+    plot: omdb?.Plot && omdb.Plot !== "N/A" ? omdb.Plot : null,
+    imdbRating:
+      omdb?.imdbRating && omdb.imdbRating !== "N/A" ? omdb.imdbRating : null,
+    runtime: omdb?.Runtime && omdb.Runtime !== "N/A" ? omdb.Runtime : null,
+    genre: omdb?.Genre && omdb.Genre !== "N/A" ? omdb.Genre : null,
+    sources: dedupeSources(sources),
+  } satisfies Recommendation;
+}
+
+export function dedupeSources(
   sources: WatchmodeTitleSource[]
 ): { name: string; type: string; url: string }[] {
   const seen = new Set<string>();

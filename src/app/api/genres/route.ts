@@ -1,21 +1,5 @@
 import { getGenres } from "@/lib/watchmode";
-
-// Curated set of genres we want to offer in the quiz, if Watchmode has them.
-const CURATED = [
-  "Comedy",
-  "Drama",
-  "Action",
-  "Thriller",
-  "Horror",
-  "Romance",
-  "Science Fiction",
-  "Documentary",
-  "Animation",
-  "Family",
-  "Fantasy",
-  "Mystery",
-  "Crime",
-];
+import { CURATED_GENRES as CURATED } from "@/lib/genres";
 
 export async function GET() {
   try {

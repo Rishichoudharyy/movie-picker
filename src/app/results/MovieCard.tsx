@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Recommendation } from "@/lib/discover";
-import { scoreBand, scoreBandClasses } from "@/lib/score";
+import ScoreBadge from "@/app/ScoreBadge";
 
 interface SimilarTitle {
   id: number;
@@ -19,18 +19,6 @@ interface TitleDetails {
   userRating: number | null;
   trailerEmbedUrl: string | null;
   similar: SimilarTitle[];
-}
-
-function ScoreBadge({ label, value, max }: { label: string; value: number; max: number }) {
-  const band = scoreBand(value, max);
-  return (
-    <span
-      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${scoreBandClasses[band]}`}
-    >
-      {label} {value}
-      {max === 100 ? "%" : `/${max}`}
-    </span>
-  );
 }
 
 export default function MovieCard({

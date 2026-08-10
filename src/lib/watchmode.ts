@@ -190,6 +190,31 @@ export async function getTitleDetails(
   );
 }
 
+export interface WatchmodeSearchResult {
+  id: number;
+  name: string;
+  year: number | null;
+  type: string;
+  image_url: string | null;
+}
+
+// Type-ahead title search, used by the "pick your movies" inputs on the
+// Fusion and Watch Next pages. Cached an hour — the same partial query
+// string gets typed by many different visitors.
+export async function searchTitles(
+  query: string
+): Promise<WatchmodeSearchResult[]> {
+  if (!query.trim()) return [];
+  const data = await watchmodeFetch<{ results: WatchmodeSearchResult[] }>(
+    "/autocomplete-search/",
+    { search_value: query, search_type: 2 },
+    60 * 60
+  );
+  return (data.results ?? []).filter(
+    (r) => r.type === "movie" || r.type === "tv_series"
+  );
+}
+
 export interface WatchmodeTrendingItem {
   id: number;
   title: string;
