@@ -26,18 +26,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <header className="flex items-center justify-between border-b border-[var(--surface-border)] px-6 py-4">
-          <Link href="/" className="text-sm font-semibold accent-gradient-text">
+        <header className="flex items-center justify-between border-b border-dashed border-[var(--surface-border)] bg-[var(--surface)] px-6 py-4">
+          <Link
+            href="/"
+            className="text-base font-bold tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             Movie Picker
           </Link>
-          <nav className="flex gap-5 text-sm font-medium text-zinc-600 dark:text-zinc-400">
-            <Link href="/quiz" className="hover:text-pink-500">
+          <nav className="flex gap-6 text-xs font-semibold tracking-widest text-[var(--muted-text)] uppercase">
+            <Link href="/quiz" className="hover:text-[var(--rose)]">
               Quiz
             </Link>
-            <Link href="/fusion" className="hover:text-pink-500">
+            <Link href="/fusion" className="hover:text-[var(--rose)]">
               Fusion
             </Link>
-            <Link href="/next" className="hover:text-pink-500">
+            <Link href="/next" className="hover:text-[var(--rose)]">
               Watch Next
             </Link>
           </nav>

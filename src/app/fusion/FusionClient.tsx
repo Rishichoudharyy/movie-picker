@@ -42,12 +42,18 @@ export default function FusionClient() {
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold">
-          <span className="accent-gradient-text">Movie Fusion</span>
-        </h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Pick 2 or 3 movies or shows you love. We&apos;ll blend them into
-          something new.
+        <p className="mb-2 text-xs font-bold tracking-widest text-[var(--rose)] uppercase">
+          Double Feature
+        </p>
+        <h1 className="text-2xl font-bold">Movie Fusion</h1>
+        <p className="mt-2 text-sm text-[var(--muted-text)]">
+          Pick 2 or 3 favorites and blend them into one new pick — a single
+          one-off mashup. Looking for an ongoing chain of suggestions
+          instead? Try{" "}
+          <a href="/next" className="underline underline-offset-4 hover:text-[var(--rose)]">
+            Watch Next
+          </a>
+          .
         </p>
       </div>
 
@@ -58,11 +64,11 @@ export default function FusionClient() {
             type="button"
             disabled={picked.length < 2 || loading}
             onClick={handleFuse}
-            className="accent-gradient flex h-12 w-full items-center justify-center rounded-full text-base font-medium text-white shadow-lg shadow-pink-500/20 transition-all hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
+            className="ticket-cta h-12 w-full justify-center disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {loading ? "Fusing…" : "Fuse them"}
+            {loading ? "Fusing…" : "Fuse Them"}
           </button>
-          {error && <p className="text-center text-sm text-red-500">{error}</p>}
+          {error && <p className="text-center text-sm text-score-low">{error}</p>}
         </div>
       )}
 

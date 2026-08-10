@@ -1,25 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import SearchPicker, { type PickedTitle } from "@/app/SearchPicker";
-import FusionResultView, { type FusionResponse } from "@/app/FusionResultView";
 import MovieCard from "@/app/results/MovieCard";
 import type { Recommendation } from "@/lib/discover";
 
-const STORAGE_KEY = "moviepicker:watched";
-const MAX_LOGGED = 5;
+const STORAGE_KEY = "moviepicker:journey";
+
+interface JourneyState {
+  trail: PickedTitle[];
+  current: Recommendation | null;
+}
 
 export default function WatchNextClient() {
-  const [watched, setWatched] = useState<PickedTitle[]>([]);
+  const [trail, setTrail] = useState<PickedTitle[]>([]);
+  const [current, setCurrent] = useState<Recommendation | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
-  const [fusionResult, setFusionResult] = useState<FusionResponse | null>(null);
-  const [fusionLoading, setFusionLoading] = useState(false);
-  const [fusionError, setFusionError] = useState<string | null>(null);
-
-  const [surprisePick, setSurprisePick] = useState<Recommendation | null>(null);
-  const [surpriseLoading, setSurpriseLoading] = useState(false);
-  const [surpriseError, setSurpriseError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // One-time sync from localStorage on mount. Deliberately not read via a
@@ -27,8 +27,12 @@ export default function WatchNextClient() {
     // server (no localStorage) vs. the client, causing a hydration mismatch.
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (raw) setWatched(JSON.parse(raw));
+      if (raw) {
+        const parsed: JourneyState = JSON.parse(raw);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTrail(parsed.trail ?? []);
+        setCurrent(parsed.current ?? null);
+      }
     } catch {
       // ignore corrupt storage
     }
@@ -37,135 +41,175 @@ export default function WatchNextClient() {
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(watched));
-  }, [watched, hydrated]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ trail, current }));
+  }, [trail, current, hydrated]);
 
-  function handleChange(next: PickedTitle[]) {
-    setWatched(next);
-    setFusionResult(null);
-    setSurprisePick(null);
-  }
-
-  async function continueVibe() {
-    const lastTwo = watched.slice(-2).map((w) => w.id);
-    setFusionLoading(true);
-    setFusionError(null);
-    setFusionResult(null);
-    setSurprisePick(null);
+  async function fetchNext(seedId: number, excludeIds: number[]) {
+    setLoading(true);
+    setError(null);
     try {
-      const res = await fetch("/api/fusion", {
+      const res = await fetch("/api/journey", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: lastTwo }),
+        body: JSON.stringify({ seedId, excludeIds }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setFusionError(data.error ?? "Something went wrong.");
+        setError(data.error ?? "Couldn't find a next suggestion.");
+        setCurrent(null);
         return;
       }
-      setFusionResult(data);
+      setCurrent(data.next);
     } catch {
-      setFusionError("Something went wrong.");
+      setError("Something went wrong.");
     } finally {
-      setFusionLoading(false);
+      setLoading(false);
     }
   }
 
+  function handleSeedPicked(picked: PickedTitle[]) {
+    const seed = picked[0];
+    if (!seed) return;
+    setTrail([seed]);
+    fetchNext(seed.id, []);
+  }
+
+  function watchedItNext() {
+    if (!current) return;
+    const nextTrail = [...trail, toPickedTitle(current)];
+    setTrail(nextTrail);
+    fetchNext(current.id, nextTrail.map((t) => t.id));
+  }
+
   async function surpriseMe() {
-    setSurpriseLoading(true);
-    setSurpriseError(null);
-    setSurprisePick(null);
-    setFusionResult(null);
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/surprise", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ watchedIds: watched.map((w) => w.id) }),
+        body: JSON.stringify({ watchedIds: trail.map((t) => t.id) }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setSurpriseError(data.error ?? "Something went wrong.");
+        setError(data.error ?? "Couldn't find a surprise pick.");
         return;
       }
-      setSurprisePick(data.pick);
+      setCurrent(data.pick);
     } catch {
-      setSurpriseError("Something went wrong.");
+      setError("Something went wrong.");
     } finally {
-      setSurpriseLoading(false);
+      setLoading(false);
     }
   }
 
-  const canRecommend = watched.length >= 1;
-  const canContinueVibe = watched.length >= 2;
+  function startOver() {
+    setTrail([]);
+    setCurrent(null);
+    setError(null);
+  }
+
+  const seed = trail[0];
 
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold">
-          <span className="accent-gradient-text">Watch Next</span>
-        </h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Log what you&apos;ve recently watched — saved on this device only.
+        <p className="mb-2 text-xs font-bold tracking-widest text-[var(--rose)] uppercase">
+          Now Showing
+        </p>
+        <h1 className="text-2xl font-bold">Watch Next</h1>
+        <p className="mt-2 text-sm text-[var(--muted-text)]">
+          Tell us one movie or show you watched — we&apos;ll keep suggesting
+          what to watch after it, one at a time.
         </p>
       </div>
 
-      <SearchPicker
-        picked={watched}
-        onChange={handleChange}
-        max={MAX_LOGGED}
-        placeholder="Log a movie or show you watched…"
-      />
-
-      {watched.length > 0 && (
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            disabled={!canContinueVibe || fusionLoading}
-            onClick={continueVibe}
-            className="accent-gradient flex h-12 flex-1 items-center justify-center rounded-full text-sm font-medium text-white shadow-lg shadow-pink-500/20 transition-all hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
-          >
-            {fusionLoading ? "Thinking…" : "Continue the vibe"}
-          </button>
-          <button
-            type="button"
-            disabled={!canRecommend || surpriseLoading}
-            onClick={surpriseMe}
-            className="flex h-12 flex-1 items-center justify-center rounded-full border border-[var(--surface-border)] text-sm font-medium transition-colors hover:border-pink-400 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {surpriseLoading ? "Thinking…" : "Surprise me"}
-          </button>
-        </div>
-      )}
-
-      {watched.length === 1 && (
-        <p className="text-center text-xs text-zinc-400">
-          Log one more to unlock &quot;Continue the vibe.&quot;
-        </p>
-      )}
-
-      {fusionError && (
-        <p className="text-center text-sm text-red-500">{fusionError}</p>
-      )}
-      {surpriseError && (
-        <p className="text-center text-sm text-red-500">{surpriseError}</p>
-      )}
-
-      {fusionResult && (
-        <FusionResultView
-          result={fusionResult}
-          onReset={() => setFusionResult(null)}
-          resetLabel="Hide"
+      {trail.length === 0 ? (
+        <SearchPicker
+          picked={[]}
+          onChange={handleSeedPicked}
+          max={1}
+          placeholder="What did you just watch?"
         />
-      )}
+      ) : (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted-text)]">
+              <span>Your journey:</span>
+              {trail.map((t, i) => (
+                <span key={t.id} className="flex items-center gap-2">
+                  {i > 0 && <span>→</span>}
+                  <span className="font-medium text-[var(--foreground)]">
+                    {t.title}
+                  </span>
+                </span>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={startOver}
+              className="text-xs font-medium text-[var(--muted-text)] underline underline-offset-4 hover:text-[var(--rose)]"
+            >
+              Start over
+            </button>
+          </div>
 
-      {surprisePick && (
-        <div className="space-y-2">
-          <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
-            Something different, for a change of pace.
-          </p>
-          <MovieCard movie={surprisePick} index={0} />
+          {loading && (
+            <p className="text-center text-sm text-[var(--muted-text)]">
+              Finding what&apos;s next…
+            </p>
+          )}
+
+          {error && <p className="text-center text-sm text-score-low">{error}</p>}
+
+          <AnimatePresence mode="wait">
+            {current && !loading && (
+              <motion.div
+                key={current.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4"
+              >
+                <MovieCard movie={current} index={0} />
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={watchedItNext}
+                    className="ticket-cta h-12 flex-1 justify-center"
+                  >
+                    Watched It — Next!
+                  </button>
+                  <button
+                    type="button"
+                    onClick={surpriseMe}
+                    className="flex h-12 flex-1 items-center justify-center rounded-sm border border-dashed border-[var(--surface-border)] text-sm font-medium transition-colors hover:border-[var(--rose)] hover:text-[var(--rose)]"
+                  >
+                    Surprise me instead
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!current && !loading && !error && seed && (
+            <p className="text-center text-sm text-[var(--muted-text)]">
+              That&apos;s everything related we could find — try starting
+              over with something else.
+            </p>
+          )}
         </div>
       )}
     </div>
   );
+}
+
+function toPickedTitle(r: Recommendation): PickedTitle {
+  return {
+    id: r.id,
+    title: r.title,
+    year: r.year ? Number(r.year) : null,
+    type: "movie",
+    poster: r.poster,
+  };
 }

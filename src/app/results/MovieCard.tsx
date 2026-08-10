@@ -60,11 +60,10 @@ export default function MovieCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.4) }}
-      whileHover={{ y: -4 }}
-      className="flex flex-col overflow-hidden rounded-2xl border border-[var(--surface-border)] bg-[var(--surface)] shadow-sm transition-shadow hover:shadow-xl"
+      className="flex flex-col overflow-hidden rounded-sm border border-[var(--surface-border)] bg-[var(--surface)]"
     >
       <div className="flex gap-4 p-4">
-        <div className="h-44 w-28 flex-shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
+        <div className="h-44 w-28 flex-shrink-0 overflow-hidden rounded-sm bg-[var(--muted-surface)]">
           {movie.poster ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -73,23 +72,23 @@ export default function MovieCard({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">
+            <div className="flex h-full w-full items-center justify-center text-xs text-[var(--muted-text)]">
               No poster
             </div>
           )}
         </div>
         <div className="flex min-w-0 flex-col gap-1">
-          <h2 className="truncate font-semibold text-zinc-950 dark:text-zinc-50">
+          <h2 className="truncate font-semibold text-[var(--foreground)]">
             {movie.title}
           </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs text-[var(--muted-text)]">
             {[movie.year, movie.runtime, movie.imdbRating && `★ ${movie.imdbRating}`]
               .filter(Boolean)
               .join(" · ")}
           </p>
-          {movie.genre && <p className="text-xs text-zinc-400">{movie.genre}</p>}
+          {movie.genre && <p className="text-xs text-[var(--muted-text)]">{movie.genre}</p>}
           {movie.plot && (
-            <p className="mt-1 line-clamp-4 text-xs text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 line-clamp-4 text-xs text-[var(--muted-text)]">
               {movie.plot}
             </p>
           )}
@@ -97,14 +96,14 @@ export default function MovieCard({
       </div>
 
       {movie.sources.length > 0 && (
-        <div className="flex flex-wrap gap-2 border-t border-[var(--surface-border)] px-4 py-3">
+        <div className="flex flex-wrap gap-2 border-t border-dashed border-[var(--surface-border)] px-4 py-3">
           {movie.sources.map((s) => (
             <a
               key={s.name}
               href={s.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              className="rounded-sm border border-dashed border-[var(--surface-border)] px-3 py-1 text-xs font-medium text-[var(--foreground)] hover:border-[var(--rose)] hover:text-[var(--rose)]"
             >
               {s.name}
             </a>
@@ -115,9 +114,9 @@ export default function MovieCard({
       <button
         type="button"
         onClick={handleToggle}
-        className="border-t border-[var(--surface-border)] px-4 py-2.5 text-left text-xs font-semibold accent-gradient-text hover:opacity-80"
+        className="border-t border-dashed border-[var(--surface-border)] px-4 py-2.5 text-left text-xs font-bold tracking-wide text-[var(--rose)] uppercase hover:text-[var(--rose-deep)]"
       >
-        {expanded ? "Show less ▲" : "Tell me more ▾"}
+        {expanded ? "Show less" : "Tell me more"}
       </button>
 
       <AnimatePresence>
@@ -127,14 +126,14 @@ export default function MovieCard({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden border-t border-[var(--surface-border)]"
+            className="overflow-hidden border-t border-dashed border-[var(--surface-border)]"
           >
             <div className="space-y-4 p-4">
               {loading && (
-                <p className="text-xs text-zinc-400">Loading the details…</p>
+                <p className="text-xs text-[var(--muted-text)]">Loading the details…</p>
               )}
               {error && (
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-[var(--muted-text)]">
                   Couldn&apos;t load extra details for this one.
                 </p>
               )}
@@ -153,23 +152,23 @@ export default function MovieCard({
 
                   {details.verdict && (
                     <div>
-                      <h3 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
+                      <h3 className="text-xs font-semibold tracking-wide text-[var(--muted-text)] uppercase">
                         Worth your time?
                       </h3>
-                      <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
+                      <p className="mt-1 text-sm text-[var(--foreground)]">
                         {details.verdict}
                       </p>
                     </div>
                   )}
 
                   {details.reviewSummary && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p className="text-xs text-[var(--muted-text)]">
                       {details.reviewSummary}
                     </p>
                   )}
 
                   {details.trailerEmbedUrl && (
-                    <div className="aspect-video overflow-hidden rounded-lg">
+                    <div className="aspect-video overflow-hidden rounded-sm">
                       <iframe
                         src={details.trailerEmbedUrl}
                         title={`${movie.title} trailer`}
@@ -182,13 +181,13 @@ export default function MovieCard({
 
                   {details.similar.length > 0 && (
                     <div>
-                      <h3 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
+                      <h3 className="text-xs font-semibold tracking-wide text-[var(--muted-text)] uppercase">
                         Watch this next
                       </h3>
                       <div className="mt-2 flex gap-3 overflow-x-auto pb-1">
                         {details.similar.map((s) => (
                           <div key={s.id} className="w-20 flex-shrink-0">
-                            <div className="aspect-[2/3] overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">
+                            <div className="aspect-[2/3] overflow-hidden rounded-sm bg-[var(--muted-surface)]">
                               {s.poster ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
@@ -198,7 +197,7 @@ export default function MovieCard({
                                 />
                               ) : null}
                             </div>
-                            <p className="mt-1 truncate text-[10px] text-zinc-600 dark:text-zinc-400">
+                            <p className="mt-1 truncate text-[10px] text-[var(--muted-text)]">
                               {s.title}
                             </p>
                           </div>

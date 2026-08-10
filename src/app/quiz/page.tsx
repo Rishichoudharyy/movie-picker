@@ -27,10 +27,10 @@ function OptionButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+      className={`rounded-sm border px-4 py-2 text-sm font-medium transition-colors ${
         selected
-          ? "accent-gradient border-transparent text-white shadow-md shadow-pink-500/20 scale-105"
-          : "border-[var(--surface-border)] bg-[var(--surface)] text-zinc-700 hover:border-pink-400 dark:text-zinc-300"
+          ? "border-[var(--rose)] bg-[var(--rose)] text-[var(--surface)]"
+          : "border-dashed border-[var(--surface-border)] bg-[var(--surface)] text-[var(--foreground)] hover:border-[var(--rose)]"
       }`}
     >
       {children}
@@ -88,17 +88,19 @@ export default function QuizPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-xl space-y-10"
       >
-        <h1 className="text-2xl font-semibold">
-          A few questions, then we&apos;ll{" "}
-          <span className="accent-gradient-text">pick something</span>.
+        <p className="mb-2 text-xs font-bold tracking-widest text-[var(--rose)] uppercase">
+          Tonight&rsquo;s Feature
+        </p>
+        <h1 className="text-2xl font-bold">
+          A few questions, then we&apos;ll pick something.
         </h1>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+          <h2 className="text-sm font-medium text-[var(--muted-text)]">
             What are you in the mood for?
           </h2>
           {loadingOptions ? (
-            <p className="text-sm text-zinc-400">Loading genres…</p>
+            <p className="text-sm text-[var(--muted-text)]">Loading genres…</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {genres.map((g) => (
@@ -115,7 +117,7 @@ export default function QuizPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+          <h2 className="text-sm font-medium text-[var(--muted-text)]">
             How long have you got?
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -132,7 +134,7 @@ export default function QuizPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+          <h2 className="text-sm font-medium text-[var(--muted-text)]">
             Movie or a show?
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -152,12 +154,12 @@ export default function QuizPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+          <h2 className="text-sm font-medium text-[var(--muted-text)]">
             Which of these do you have? (optional — leave blank for
             everything)
           </h2>
           {loadingOptions ? (
-            <p className="text-sm text-zinc-400">Loading services…</p>
+            <p className="text-sm text-[var(--muted-text)]">Loading services…</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {services.map((s) => (
@@ -177,9 +179,9 @@ export default function QuizPage() {
           type="button"
           disabled={!canSubmit}
           onClick={handleSubmit}
-          className="accent-gradient flex h-12 w-full items-center justify-center rounded-full text-base font-medium text-white shadow-lg shadow-pink-500/20 transition-all hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
+          className="ticket-cta h-12 w-full justify-center disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Find me something to watch
+          Find Me Something to Watch
         </button>
       </motion.div>
     </div>

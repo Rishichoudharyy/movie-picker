@@ -73,7 +73,7 @@ export default function SearchPicker({
           {picked.map((p) => (
             <span
               key={p.id}
-              className="flex items-center gap-2 rounded-full border border-[var(--surface-border)] bg-[var(--surface)] py-1 pr-2 pl-1 text-sm"
+              className="flex items-center gap-2 rounded-sm border-2 border-dashed border-[var(--gold)] bg-[var(--surface)] py-1 pr-2 pl-1 text-sm"
             >
               {p.poster && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -87,7 +87,7 @@ export default function SearchPicker({
               <button
                 type="button"
                 onClick={() => removeTitle(p.id)}
-                className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                className="text-[var(--muted-text)] hover:text-[var(--rose)]"
                 aria-label={`Remove ${p.title}`}
               >
                 ×
@@ -105,21 +105,21 @@ export default function SearchPicker({
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => results.length > 0 && setOpen(true)}
             placeholder={placeholder}
-            className="w-full rounded-full border border-[var(--surface-border)] bg-[var(--surface)] px-4 py-2.5 text-sm outline-none focus:border-pink-400"
+            className="w-full rounded-sm border border-[var(--surface-border)] bg-[var(--surface)] px-4 py-2.5 text-sm outline-none focus:border-[var(--rose)]"
           />
           {loading && (
-            <span className="absolute top-1/2 right-4 -translate-y-1/2 text-xs text-zinc-400">
+            <span className="absolute top-1/2 right-4 -translate-y-1/2 text-xs text-[var(--muted-text)]">
               …
             </span>
           )}
           {open && query.trim() !== "" && results.length > 0 && (
-            <div className="absolute z-10 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] shadow-lg">
+            <div className="absolute z-10 mt-2 max-h-72 w-full overflow-y-auto rounded-sm border border-[var(--surface-border)] bg-[var(--surface)] shadow-lg">
               {results.map((r) => (
                 <button
                   key={r.id}
                   type="button"
                   onClick={() => addTitle(r)}
-                  className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-[var(--muted-surface)]"
                 >
                   {r.poster ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -129,12 +129,12 @@ export default function SearchPicker({
                       className="h-10 w-8 flex-shrink-0 rounded object-cover"
                     />
                   ) : (
-                    <span className="h-10 w-8 flex-shrink-0 rounded bg-zinc-200 dark:bg-zinc-800" />
+                    <span className="h-10 w-8 flex-shrink-0 rounded bg-[var(--muted-surface)]" />
                   )}
                   <span className="min-w-0 flex-1 truncate">
                     {r.title}
                     {r.year && (
-                      <span className="text-zinc-400"> · {r.year}</span>
+                      <span className="text-[var(--muted-text)]"> · {r.year}</span>
                     )}
                   </span>
                 </button>

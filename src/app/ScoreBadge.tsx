@@ -12,7 +12,7 @@ export default function ScoreBadge({
   const band = scoreBand(value, max);
   return (
     <span
-      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${scoreBandClasses[band]}`}
+      className={`rounded-sm px-2.5 py-1 text-xs font-semibold ${scoreBandClasses[band]}`}
     >
       {label} {value}
       {max === 100 ? "%" : `/${max}`}

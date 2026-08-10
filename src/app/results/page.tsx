@@ -27,26 +27,24 @@ export default async function ResultsPage(props: PageProps<"/results">) {
     <div className="flex flex-1 flex-col items-center bg-[var(--background)] px-6 py-16">
       <div className="w-full max-w-5xl space-y-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">
-            Here&apos;s what we <span className="accent-gradient-text">found</span>
-          </h1>
+          <h1 className="text-2xl font-bold">Here&apos;s what we found</h1>
           <Link
             href="/quiz"
-            className="text-sm font-medium text-zinc-600 underline underline-offset-4 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50"
+            className="text-sm font-medium text-[var(--muted-text)] underline underline-offset-4 hover:text-[var(--rose)]"
           >
             Retake the quiz
           </Link>
         </div>
 
         {results.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-zinc-300 p-10 text-center text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
+          <div className="rounded-lg border border-dashed border-[var(--surface-border)] p-10 text-center text-[var(--muted-text)]">
             <p>
               Nothing matched all of that. Try a different service or set
               runtime to &quot;doesn&apos;t matter.&quot;
             </p>
             <Link
               href="/quiz"
-              className="mt-4 inline-block font-medium text-zinc-950 underline underline-offset-4 dark:text-zinc-50"
+              className="mt-4 inline-block font-medium text-[var(--foreground)] underline underline-offset-4"
             >
               Back to quiz
             </Link>

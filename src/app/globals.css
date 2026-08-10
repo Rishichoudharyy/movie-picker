@@ -1,16 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf7f2;
-  --foreground: #1c1320;
-  --surface: #ffffff;
-  --surface-border: #ece4da;
-  --accent-from: #f97316;
-  --accent-via: #ec4899;
-  --accent-to: #8b5cf6;
-  --score-good: #16a34a;
-  --score-mid: #d97706;
-  --score-low: #dc2626;
+  --background: #f7ede2;
+  --foreground: #3a2432;
+  --surface: #fff8f1;
+  --surface-border: #e7c9ce;
+  --rose: #b5495b;
+  --rose-deep: #8c3548;
+  --gold: #ab8636;
+  --muted-text: #6b5560;
+  --muted-surface: #f0e2d8;
+  --muted-surface-hover: #e7d5c8;
+  --score-good: #4c7a4f;
+  --score-mid: #ab8636;
+  --score-low: #a6435a;
 }
 
 @theme inline {
@@ -18,50 +21,121 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-surface-border: var(--surface-border);
-  --color-accent-from: var(--accent-from);
-  --color-accent-via: var(--accent-via);
-  --color-accent-to: var(--accent-to);
+  --color-rose: var(--rose);
+  --color-rose-deep: var(--rose-deep);
+  --color-gold: var(--gold);
+  --color-muted-text: var(--muted-text);
+  --color-muted-surface: var(--muted-surface);
+  --color-muted-surface-hover: var(--muted-surface-hover);
   --color-score-good: var(--score-good);
   --color-score-mid: var(--score-mid);
   --color-score-low: var(--score-low);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: Georgia, "Iowan Old Style", "Times New Roman", serif;
 }
 
+/* Theatre-at-night, not a naive light-mode invert. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f0a14;
-    --foreground: #f3ecf7;
-    --surface: #1a1220;
-    --surface-border: #2e2338;
+  :root:not([data-theme="light"]) {
+    --background: #1c1315;
+    --foreground: #f3e6e2;
+    --surface: #271b1e;
+    --surface-border: #4a2e33;
+    --rose: #d9899a;
+    --rose-deep: #e7aab6;
+    --gold: #d4b46a;
+    --muted-text: #b09aa0;
+    --muted-surface: #332326;
+    --muted-surface-hover: #402b2f;
+    --score-good: #7fae82;
+    --score-mid: #d4b46a;
+    --score-low: #d9899a;
   }
+}
+
+:root[data-theme="dark"] {
+  --background: #1c1315;
+  --foreground: #f3e6e2;
+  --surface: #271b1e;
+  --surface-border: #4a2e33;
+  --rose: #d9899a;
+  --rose-deep: #e7aab6;
+  --gold: #d4b46a;
+  --muted-text: #b09aa0;
+  --muted-surface: #332326;
+  --muted-surface-hover: #402b2f;
+  --score-good: #7fae82;
+  --score-mid: #d4b46a;
+  --score-low: #d9899a;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-.accent-gradient {
-  background-image: linear-gradient(
-    100deg,
-    var(--accent-from),
-    var(--accent-via),
-    var(--accent-to)
-  );
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
 }
 
-.accent-gradient-text {
-  background-image: linear-gradient(
-    100deg,
-    var(--accent-from),
-    var(--accent-via),
-    var(--accent-to)
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+.ticket-accent {
+  color: var(--rose);
+}
+
+.ticket-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--rose);
+  color: var(--surface);
+  border-radius: 3px;
+  padding: 0.8rem 1.6rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.ticket-cta:hover {
+  background: var(--rose-deep);
+}
+
+.perforated {
+  border-style: dashed;
+  border-color: var(--surface-border);
+}
+
+.ticket-stub {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 4px;
+}
+
+.ticket-stub::before,
+.ticket-stub::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  background: var(--background);
+  border: 1px solid var(--surface-border);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.ticket-stub::before {
+  left: -11px;
+}
+
+.ticket-stub::after {
+  right: -11px;
 }
 
 @keyframes shimmer {
