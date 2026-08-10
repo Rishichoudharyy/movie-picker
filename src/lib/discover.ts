@@ -30,8 +30,8 @@ export interface RecommendationQuery {
   type: "movie" | "tv_series";
 }
 
-const CANDIDATE_LIMIT = 20;
-const RESULT_LIMIT = 12;
+const CANDIDATE_LIMIT = 100;
+const RESULT_LIMIT = 40;
 
 export async function getRecommendations(
   query: RecommendationQuery
