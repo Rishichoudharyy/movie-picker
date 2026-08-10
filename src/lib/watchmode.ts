@@ -39,7 +39,8 @@ function apiKey(): string {
 
 async function watchmodeFetch<T>(
   path: string,
-  params: Record<string, string | number | undefined> = {}
+  params: Record<string, string | number | undefined> = {},
+  revalidateSeconds?: number
 ): Promise<T> {
   const url = new URL(`${BASE_URL}${path}`);
   url.searchParams.set("apiKey", apiKey());
@@ -47,7 +48,12 @@ async function watchmodeFetch<T>(
     if (v !== undefined && v !== "") url.searchParams.set(k, String(v));
   }
 
-  const res = await fetch(url.toString());
+  const res = await fetch(
+    url.toString(),
+    revalidateSeconds !== undefined
+      ? { next: { revalidate: revalidateSeconds } }
+      : undefined
+  );
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`Watchmode ${path} failed: ${res.status} ${body}`);
@@ -60,9 +66,12 @@ async function watchmodeFetch<T>(
 let genreCache: WatchmodeGenre[] | null = null;
 const sourceCache: Record<string, WatchmodeSource[]> = {};
 
+const DAY = 60 * 60 * 24;
+const SIX_HOURS = 60 * 60 * 6;
+
 export async function getGenres(): Promise<WatchmodeGenre[]> {
   if (genreCache) return genreCache;
-  const data = await watchmodeFetch<WatchmodeGenre[]>("/genres/");
+  const data = await watchmodeFetch<WatchmodeGenre[]>("/genres/", {}, 7 * DAY);
   genreCache = data;
   return data;
 }
@@ -71,9 +80,11 @@ export async function getSourcesForRegion(
   region = "IN"
 ): Promise<WatchmodeSource[]> {
   if (sourceCache[region]) return sourceCache[region];
-  const data = await watchmodeFetch<WatchmodeSource[]>("/sources/", {
-    regions: region,
-  });
+  const data = await watchmodeFetch<WatchmodeSource[]>(
+    "/sources/",
+    { regions: region },
+    7 * DAY
+  );
   sourceCache[region] = data;
   return data;
 }
@@ -125,7 +136,8 @@ export async function discoverTitles(
       regions: region,
       sort_by: "popularity_desc",
       limit: params.limit ?? 20,
-    }
+    },
+    60 * 60 // 1 hour — results should feel reasonably fresh
   );
   return data.titles ?? [];
 }
@@ -135,7 +147,73 @@ export async function getTitleSources(
   region = "IN"
 ): Promise<WatchmodeTitleSource[]> {
   const data = await watchmodeFetch<WatchmodeTitleSource[]>(
-    `/title/${titleId}/sources/`
+    `/title/${titleId}/sources/`,
+    {},
+    60 * 60 * 12
   );
   return data.filter((s) => s.region === region);
+}
+
+export interface WatchmodeTitleDetails {
+  id: number;
+  title: string;
+  year: number | null;
+  imdb_id: string | null;
+  plot_overview: string | null;
+  will_you_like_this: string | null;
+  review_summary: string | null;
+  critic_score: number | null;
+  user_rating: number | null;
+  runtime_minutes: number | null;
+  genre_names: string[];
+  poster: string | null;
+  posterMedium: string | null;
+  posterLarge: string | null;
+  backdrop: string | null;
+  trailer: string | null;
+  trailer_thumbnail: string | null;
+  similar_titles: number[];
+}
+
+// Full title details (verdict, scores, trailer, similar titles). This is a
+// heavier call than list-titles/sources, so it's only ever fetched on demand
+// (per-card "tell me more" click), never eagerly for a whole results grid —
+// the account's monthly Watchmode quota can't cover that. Cached for a day
+// since the same popular titles get expanded by many different visitors.
+export async function getTitleDetails(
+  titleId: number
+): Promise<WatchmodeTitleDetails> {
+  return watchmodeFetch<WatchmodeTitleDetails>(
+    `/title/${titleId}/details/`,
+    { append_to_response: "similar_titles" },
+    DAY
+  );
+}
+
+export interface WatchmodeTrendingItem {
+  id: number;
+  title: string;
+  year: number | null;
+  imdb_id: string | null;
+  type: string;
+  popularity_percentile: number | null;
+}
+
+// Cheap, shared-across-all-visitors call for a homepage "trending now" strip.
+export async function getTrending(
+  type: "movie" | "tv_series",
+  region = "IN",
+  limit = 10
+): Promise<WatchmodeTrendingItem[]> {
+  const data = await watchmodeFetch<{ titles: WatchmodeTrendingItem[] }>(
+    "/list-titles/",
+    {
+      types: type,
+      regions: region,
+      sort_by: "popularity_desc",
+      limit,
+    },
+    SIX_HOURS
+  );
+  return data.titles ?? [];
 }

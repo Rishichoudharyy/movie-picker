@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 type RuntimeBucket = "short" | "medium" | "long" | "any";
 type MediaType = "movie" | "tv_series";
@@ -26,10 +27,10 @@ function OptionButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+      className={`rounded-full border px-4 py-2 text-sm font-medium transition-all ${
         selected
-          ? "border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950"
-          : "border-zinc-300 text-zinc-700 hover:border-zinc-950 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-white"
+          ? "accent-gradient border-transparent text-white shadow-md shadow-pink-500/20 scale-105"
+          : "border-[var(--surface-border)] bg-[var(--surface)] text-zinc-700 hover:border-pink-400 dark:text-zinc-300"
       }`}
     >
       {children}
@@ -80,10 +81,16 @@ export default function QuizPage() {
   const canSubmit = !loadingOptions && genre !== null;
 
   return (
-    <div className="flex flex-1 flex-col items-center bg-zinc-50 px-6 py-16 dark:bg-black">
-      <div className="w-full max-w-xl space-y-10">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
-          A few questions, then we&apos;ll pick something.
+    <div className="flex flex-1 flex-col items-center bg-[var(--background)] px-6 py-16">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-xl space-y-10"
+      >
+        <h1 className="text-2xl font-semibold">
+          A few questions, then we&apos;ll{" "}
+          <span className="accent-gradient-text">pick something</span>.
         </h1>
 
         <section className="space-y-3">
@@ -170,11 +177,11 @@ export default function QuizPage() {
           type="button"
           disabled={!canSubmit}
           onClick={handleSubmit}
-          className="flex h-12 w-full items-center justify-center rounded-full bg-zinc-950 text-base font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+          className="accent-gradient flex h-12 w-full items-center justify-center rounded-full text-base font-medium text-white shadow-lg shadow-pink-500/20 transition-all hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
         >
           Find me something to watch
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }

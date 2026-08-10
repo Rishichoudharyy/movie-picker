@@ -1,6 +1,7 @@
 import {
   discoverTitles,
   getTitleSources,
+  getTrending,
   type WatchmodeTitleSource,
 } from "./watchmode";
 import {
@@ -83,6 +84,37 @@ export async function getRecommendations(
   );
 
   return withSources;
+}
+
+export interface TrendingPoster {
+  id: number;
+  title: string;
+  year: string;
+  poster: string | null;
+}
+
+// Homepage strip: trending titles with a poster for each, resolved via OMDb
+// (cheap and already-cached) rather than Watchmode's heavier details call.
+export async function getTrendingWithPosters(
+  type: "movie" | "tv_series" = "movie",
+  limit = 10
+): Promise<TrendingPoster[]> {
+  const trending = await getTrending(type, "IN", limit);
+  const withImdbId = trending.filter((t) => t.imdb_id);
+
+  const enriched = await Promise.all(
+    withImdbId.map(async (t) => {
+      const omdb = await getOmdbByImdbId(t.imdb_id!).catch(() => null);
+      return {
+        id: t.id,
+        title: t.title,
+        year: omdb?.Year ?? String(t.year ?? ""),
+        poster: omdb?.Poster && omdb.Poster !== "N/A" ? omdb.Poster : null,
+      } satisfies TrendingPoster;
+    })
+  );
+
+  return enriched.filter((t) => t.poster !== null);
 }
 
 function dedupeSources(

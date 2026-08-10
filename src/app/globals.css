@@ -1,21 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf7f2;
+  --foreground: #1c1320;
+  --surface: #ffffff;
+  --surface-border: #ece4da;
+  --accent-from: #f97316;
+  --accent-via: #ec4899;
+  --accent-to: #8b5cf6;
+  --score-good: #16a34a;
+  --score-mid: #d97706;
+  --score-low: #dc2626;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-border: var(--surface-border);
+  --color-accent-from: var(--accent-from);
+  --color-accent-via: var(--accent-via);
+  --color-accent-to: var(--accent-to);
+  --color-score-good: var(--score-good);
+  --color-score-mid: var(--score-mid);
+  --color-score-low: var(--score-low);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0f0a14;
+    --foreground: #f3ecf7;
+    --surface: #1a1220;
+    --surface-border: #2e2338;
   }
 }
 
@@ -23,4 +41,45 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.accent-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--accent-from),
+    var(--accent-via),
+    var(--accent-to)
+  );
+}
+
+.accent-gradient-text {
+  background-image: linear-gradient(
+    100deg,
+    var(--accent-from),
+    var(--accent-via),
+    var(--accent-to)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
 }

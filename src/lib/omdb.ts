@@ -25,7 +25,10 @@ export async function getOmdbByImdbId(
   url.searchParams.set("apikey", apiKey());
   url.searchParams.set("i", imdbId);
 
-  const res = await fetch(url.toString());
+  // Poster/plot/rating barely change once a title exists, so cache generously.
+  const res = await fetch(url.toString(), {
+    next: { revalidate: 60 * 60 * 24 },
+  });
   if (!res.ok) return null;
 
   const data = (await res.json()) as OmdbTitle;
